@@ -12,7 +12,7 @@
 #include <sys/utsname.h>
 #include <mach-o/nlist.h>
 #include <mach-o/getsect.h>
-#include "../lib/kernel_call/kernel_memory.h"
+#include "kernel_memory.h"
 #include "lzssdec.h"
 #import <UIKit/UIView.h>
 #include "find_port.h"
@@ -131,7 +131,7 @@ int always_AMFIPID;
 bool runShenPatchOWO = false;
 int thejbdawaits = 0;
 int kickcheck = 0;
-
+int doweneedamfidPatch = 0;
 char *sysctlWithName(const char *name) {
     kern_return_t kr = KERN_FAILURE;
     char *ret = NULL;
@@ -165,7 +165,7 @@ bool machineNameContains(const char *string) {
     return ret;
 }
 
-NSString *getKernelBuildVersion(void) {
+NSString *getKernelBuildVersion() {
     NSString *kernelBuild = nil;
     NSString *cleanString = nil;
     char *kernelVersion = NULL;
@@ -338,9 +338,9 @@ void initSettingsIfNotExist()
         
         if ([getNameFromInt(autoSelectExploit())  isEqual: @"ERROR"])
         {
-            showMSG(@"There was an error automatically selecting your exploit. The default has been set to machswap. Please change this under settings if you would like to use a different one.", false, false);
+            showMSG(@"Đã xảy ra lỗi khi tự động chọn khai thác của bạn. Mặc định đã được đặt thành machswap. Vui lòng thay đổi cài đặt này trong cài đặt nếu bạn muốn sử dụng một cài đặt khác.", false, false);
         } else {
-            NSString *msgString = [NSString stringWithFormat:@"Since this is your first run, we have automatically selected what we think is the best exploit for your device. The exploit chosen is %@. If this is not your desired exploit, please change it under the settings menu.", getNameFromInt(autoSelectExploit())];
+            NSString *msgString = [NSString stringWithFormat:@"Vì đây là lần chạy đầu tiên của bạn, chúng tôi đã tự động chọn những gì chúng tôi nghĩ là cách khai thác tốt nhất cho thiết bị của bạn. Khai thác được chọn là %@. Nếu đây không phải là cách khai thác mong muốn của bạn, vui lòng thay đổi nó trong menu cài đặt.", getNameFromInt(autoSelectExploit())];
             
             showMSG(msgString, false, false);
             
@@ -400,7 +400,7 @@ void saveCustomSetting(NSString *setting, int settingResult)
     [defaults setInteger:settingResult forKey:setting];
 }
 
-BOOL shouldLoadTweaks(void)
+BOOL shouldLoadTweaks()
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if ([defaults integerForKey:@"LoadTweaks"] == 0)
@@ -411,19 +411,19 @@ BOOL shouldLoadTweaks(void)
     }
 }
 
-int getExploitType(void)
+int getExploitType()
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     return (int)[defaults integerForKey:@"ExploitType"];
 }
 
-int getPackagerType(void)
+int getPackagerType()
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     return (int)[defaults integerForKey:@"PackagerType"];
 }
 
-BOOL isRootless(void)
+BOOL isRootless()
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if ([defaults integerForKey:@"RootSetting"] == 1)
@@ -434,7 +434,7 @@ BOOL isRootless(void)
     }
 }
 
-BOOL shouldRestoreFS(void)
+BOOL shouldRestoreFS()
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if ([defaults integerForKey:@"RestoreFS"] == 0)
@@ -446,7 +446,7 @@ BOOL shouldRestoreFS(void)
 }
 
 
-uint64_t selfproc(void) {
+uint64_t selfproc() {
     // TODO use kcall(proc_find) + ZM_FIX_ADDR
     uint64_t proc = 0;
     if (proc == 0) {
@@ -515,7 +515,7 @@ void runMachswap() {
     
 }
 
-void runMachswap2(void) {
+void runMachswap2() {
     
     offsets_t *ms_offs = get_machswap_offsets();
     machswap2_exploit(ms_offs, &tfp0, &kbase);
@@ -550,7 +550,7 @@ void runMachswap2(void) {
 
 //V_SWAP
 
-uint64_t find_kernel_base_sockpuppet(void) {
+uint64_t find_kernel_base_sockpuppet() {
     uint64_t hostport_addr = find_port_address_sockpuppet(mach_host_self(), MACH_MSG_TYPE_COPY_SEND);
     uint64_t realhost = ReadKernel64(hostport_addr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT));
     
@@ -565,7 +565,7 @@ uint64_t find_kernel_base_sockpuppet(void) {
     return 0;
 }
 
-uint64_t find_kernel_base_timewaste(void) {
+uint64_t find_kernel_base_timewaste() {
     
     if (kernelbase_exportedBYTW !=0) {
         return kernelbase_exportedBYTW;
@@ -615,7 +615,7 @@ void runVoucherSwap() {
     }
 }
 
-void runSockPuppet(void) {
+void runSockPuppet() {
     ourprogressMeter();
     get_tfp0();
     
@@ -632,7 +632,7 @@ void runSockPuppet(void) {
     }
     if (tfp0 == 0) {
         util_info("ERROR!");
-        NSString *str = [NSString stringWithFormat:@"Exploit failed, however with sockpuppet. You can open the app up again and just keep trying again until it either, kernel panics or succeeds. tfp: 0x%x", tfp0];
+        NSString *str = [NSString stringWithFormat:@"Tuy nhiên, khai thác không thành công với sockpuppet. Bạn có thể mở lại ứng dụng và tiếp tục thử lại cho đến khi, hạt nhân hoảng loạn hoặc thành công. Tfp0: 0x%x", tfp0];
         showMSG(str, true, false);
         
         dispatch_sync( dispatch_get_main_queue(), ^{
@@ -661,7 +661,7 @@ void runSockPuppet(void) {
     
 }
 
-void runTIMEWaste(void)
+void runTIMEWaste()
 {
     ourprogressMeter();
     
@@ -676,7 +676,7 @@ void runTIMEWaste(void)
     }
     if (tfp0 == 0) {
         util_info("ERROR!");
-        NSString *str = [NSString stringWithFormat:@"Exploit failed, Please reboot your device and try again. Timewaste exploit will not succeed on this bootup unfortunately."];
+        NSString *str = [NSString stringWithFormat:@"Khai thác không thành công, Vui lòng khởi động lại thiết bị của bạn và thử lại. Rất tiếc, việc khai thác Timewaste sẽ không thành công trong lần khởi động này."];
         showMSG(str, true, false);
         
         dispatch_sync( dispatch_get_main_queue(), ^{
@@ -966,10 +966,10 @@ dictionary[@(name)] = ADDRSTRING(value); \
 
 void saveOffs_rootless() {
     
-    _assert(chdir("/var/containers/Bundle/OlVer") == ERR_SUCCESS, @"Failed to create jailbreak directory.", true);
+    _assert(chdir("/var/containers/Bundle/freya") == ERR_SUCCESS, @"Failed to create jailbreak directory.", true);
     
     
-    NSString *offsetsFile = @"/var/containers/Bundle/OlVer/offsets.plist";
+    NSString *offsetsFile = @"/var/containers/Bundle/freya/offsets.plist";
     NSMutableDictionary *dictionary = [NSMutableDictionary new];
 #define ADDRSTRING(val)        [NSString stringWithFormat:@ADDR, val]
 #define CACHEADDR(value, name) do { \
@@ -1325,7 +1325,7 @@ int execCmd(const char *cmd, ...) {
     return WEXITSTATUS(rv);
 }
 
-uint64_t getKernproc(void)
+uint64_t getKernproc()
 {
     uint64_t kernproc = 0x0;
     while (kernproc != 0x0)
@@ -1386,7 +1386,7 @@ char *itoa(long n) {
     return   buf;
 }
 
-bool patchtheSIGNSofCOde(void){
+bool patchtheSIGNSofCOde(){
     util_info("amfid_patch in progress...");
     posix_spawnattr_t attrp;
     posix_spawnattr_init(&attrp);
@@ -1410,9 +1410,11 @@ bool patchtheSIGNSofCOde(void){
     //execCmd("/freya/inject_criticald", itoa(1), "/usr/lib/pspawn_payload.dylib", NULL);
     //execCmd("/freya/inject_criticald", itoa(amfid_pid), "/usr/lib/pspawn_payload.dylib", NULL);
     //execCmd("/freya/inject_criticald", itoa(1), "/usr/lib/amfid_payload.dylib", NULL);
-    execCmd("/freya/inject_criticald", itoa(amfid_pid), "/usr/lib/amfid_payload.dylib", NULL);
+    //execCmd("/freya/inject_criticald", itoa(1), "/usr/lib/amfid_payload.dylib", NULL);
+   execCmd("/freya/inject_criticald", itoa(amfid_pid), "/usr/lib/amfid_payload.dylib", NULL);
    // execCmd("/bin/ps", "-p", itoa(amfid_pid), NULL); // built-in tools
     util_info("amfid has been infected by our dynamic library, it is now dismantled");//dismantled
+    doweneedamfidPatch = 1;
     return true;
 }
 
@@ -1469,21 +1471,11 @@ void restoreRootFS()
     int checkJBRemoverMarker = (file_exists("/var/mobile/Media/.bootstrapped_Th0r_remover"));
     int checkjailbreakdRun = (file_exists("/var/tmp/jailbreakd.pid"));
     int checkpspawnhook = (file_exists("/var/run/pspawn_hook.ts"));
-    printf("JUSTremovecheck exists?: %d\n",JUSTremovecheck);
-    printf("checkuicache marker exists?: %d\n", checkuicache);
-    printf("Uncover marker exists?: %d\n", checkuncovermarker);
-    printf("pspawnhook marker exists?: %d\n", checkpspawnhook);
-    printf("checkbash marker exists?: %d\n", checkbash);
-    printf("Uncover marker exists?: %d\n", checkuncovermarker);
-    printf("JBRemover marker exists?: %d\n", checkJBRemoverMarker);
-    printf("OlVer marker exists?: %d\n", checkth0rmarker);
-    printf("OlVer Final marker exists?: %d\n", checkth0rmarkerFinal);
-    printf("chimera marker exists?: %d\n", checkchimeramarker);
-    printf("Jailbreakd Run marker exists?: %d\n", checkjailbreakdRun);
+    
     ourprogressMeter();
 
     struct passwd *const root_pw = getpwnam("root");
-   
+
     util_info("Restoring RootFS....");
     
     int const rootfd = open("/", O_RDONLY);
@@ -1507,11 +1499,7 @@ void restoreRootFS()
     free(systemSnapshot);
     systemSnapshot = NULL;
 
-    extractFile(get_bootstrap_file(@"aJBDofSorts.tar.gz"), @"/");
-    chmod("/freya/jailbreakd", 4755);
-    chown("/freya/jailbreakd", 0, 0);
 
-   patchtheSIGNSofCOde();
     if (checkchimeramarker == 1) {
         char *const systemSnapshotMountPoint = "/var/rootfsmnt";
         if (is_mountpoint(systemSnapshotMountPoint)) {
@@ -1572,6 +1560,14 @@ void restoreRootFS()
         _assert(waitFF(systemSnapshotLaunchdPath) == ERR_SUCCESS, localize(@"Unable to verify mounted snapshot."), true);
         //int runtest = execCmd("/bin/bash", NULL);
         if (checkbash == 1) {
+             extractFile(get_bootstrap_file(@"aJBDofSorts.tar.gz"), @"/");
+             chmod("/freya/jailbreakd", 4755);
+             chown("/freya/jailbreakd", 0, 0);
+            if (doweneedamfidPatch == 1) {
+                util_info("Amfid done fucked up already!");
+            } else {
+                patchtheSIGNSofCOde();
+            }
             cp("/freya/uicache", "/usr/bin/uicache");
             _assert(clean_file("/usr/bin/uicache"), localize(@"Unable to clean old uicache binary."), true);
             unlink("/usr/bin/uicache");
@@ -1597,11 +1593,6 @@ void restoreRootFS()
     if (checkuicache == 1) {
 
         uicaching("uicache");
-//        _assert(execCmd("/usr/bin/uicache", NULL) >= 0, localize(@"Unable to refresh icon cache."), true);
-  //      _assert(clean_file("/usr/bin/uicache"), localize(@"Unable to clean uicache binary."), true);
-       // trust_file(@"/freya/uicache");
-       // _assert(execCmd("/freya/uicache", NULL) >= 0, localize(@"Unable to refresh icon cache."), true);
-       // _assert(clean_file("/freya/uicache"), localize(@"Unable to clean uicache binary."), true);
         trust_file(@"/usr/bin/uicache");
 
         _assert(execCmd("/usr/bin/uicache", NULL) >= 0, localize(@"Unable to refresh icon cache."), true);
@@ -1804,7 +1795,7 @@ void restoreRootFS()
     ourprogressMeter();
     util_info("Rebooting...");
 
-    showMSG(NSLocalizedString(@"RootFS Restored! We are going to reboot your device.", nil), 1, 1);
+    showMSG(NSLocalizedString(@"RootFS Restored! Chúng tôi sẽ khởi động lại thiết bị của bạn.", nil), 1, 1);
     dispatch_sync( dispatch_get_main_queue(), ^{
         UIApplication *app = [UIApplication sharedApplication];
         [app performSelector:@selector(suspend)];
@@ -1886,7 +1877,7 @@ void renameSnapshot(int rootfd, const char* rootFsMountPoint, const char **snaps
     // Reboot.
     close(rootfd);
     if (kCFCoreFoundationVersionNumber >= 1570.15) {
-        showMSG(NSLocalizedString(@"RootFS Renamed! Pyshc, can't rename yet, use another jb tool to rename snap first.", nil), 1, 1);
+        showMSG(NSLocalizedString(@"RootFS Renamed! Pyshc, chưa thể đổi tên, hãy sử dụng công cụ jb khác để đổi tên snap trước.", nil), 1, 1);
         dispatch_sync( dispatch_get_main_queue(), ^{
             UIApplication *app = [UIApplication sharedApplication];
             [app performSelector:@selector(suspend)];
@@ -1899,7 +1890,7 @@ void renameSnapshot(int rootfd, const char* rootFsMountPoint, const char **snaps
 
         });
     } else {
-        showMSG(NSLocalizedString(@"RootFS Renamed! We are going to reboot your device.", nil), 1, 1);
+        showMSG(NSLocalizedString(@"RootFS Renamed! Chúng tôi sẽ khởi động lại thiết bị của bạn.", nil), 1, 1);
         dispatch_sync( dispatch_get_main_queue(), ^{
             UIApplication *app = [UIApplication sharedApplication];
             [app performSelector:@selector(suspend)];
@@ -2019,7 +2010,7 @@ void remountFS(bool shouldRestore) {
         printf("resultofMountattempt true = 1: %d\n", resultofMountattempt);
         if ( resultofMountattempt == 0 ) {
             printf("failed to remount, please remove update file and reboot or try again after rebooting\n");
-            showMSG(NSLocalizedString(@"failed to remount, please remove update file and reboot or try again after rebooting.", nil), 1, 1);
+            showMSG(NSLocalizedString(@"không thể kết nối lại, vui lòng xóa tệp cập nhật và khởi động lại hoặc thử lại sau khi khởi động lại.", nil), 1, 1);
             dispatch_sync( dispatch_get_main_queue(), ^{
                 UIApplication *app = [UIApplication sharedApplication];
                 [app performSelector:@selector(suspend)];
@@ -2035,7 +2026,7 @@ void remountFS(bool shouldRestore) {
         if (need_initialSSRenamed == 3) {
             ourprogressMeter();
             util_info("Rebooting...");
-            showMSG(NSLocalizedString(@"RootFS snapshot renamed! We are going to reboot your device.", nil), 1, 1);
+            showMSG(NSLocalizedString(@"RootFS snapshot renamed! Chúng tôi sẽ khởi động lại thiết bị của bạn.", nil), 1, 1);
             dispatch_sync( dispatch_get_main_queue(), ^{
                 UIApplication *app = [UIApplication sharedApplication];
                 [app performSelector:@selector(suspend)];
@@ -2345,7 +2336,7 @@ bool doesFileExist(NSString *fileName)
     }
 }
 
-void startJailbreakD(void)
+void startJailbreakD()
 {
     removeFileIfExists("/var/log/pspawn.log");
     removeFileIfExists("/freya/jailbreakd.old.log");
@@ -2366,7 +2357,7 @@ void startJailbreakD(void)
     if (waitFF("/var/tmp/jailbreakd.pid") == ERR_SUCCESS) {
         printf(".\n");
         util_info("Jailbreakd has been loaded!");
-        
+       
         thejbdawaits = 1;
     } else {
         util_info("Error loading jailbreakd!");
@@ -2374,7 +2365,7 @@ void startJailbreakD(void)
             util_info("AGAIN FFS Error loading jailbreakd!");
             printf(".\n");
             util_info("Jailbreakd has been loaded!");
-            
+           
             thejbdawaits = 1;
 
         } else {
@@ -2393,8 +2384,26 @@ void startJailbreakD(void)
         }
     }
 }
+bool killAMFID() {
+    amfid_pid = pidOfProcess("/usr/libexec/amfid");
+    util_info("amfid pid: %d", amfid_pid);
+    if (!(amfid_pid > 1)) {
+        util_info("Unable to find amfid pid.");
+        return false;
+    }
+    if (kill(amfid_pid, SIGKILL) != ERR_SUCCESS) {
+        util_info("Unable to terminate amfid.");
+        return false;
+    }
+    util_info("amfid pid: %d", amfid_pid);
+    util_info("SIGKILL amfid pid.");
+    
 
-bool reBack(void) {
+    return true;
+}
+
+
+bool reBack() {
     //execCmd("/usr/bin/sbreload");
     pid_t backboardd_pid = pidOfProcess("/usr/libexec/backboardd");
     if (!(backboardd_pid > 1)) {
@@ -2405,11 +2414,11 @@ bool reBack(void) {
         util_info("Unable to terminate backboardd.");
         return false;
     }
-    
+
     return true;
 }
 
-void disableStashing(void)
+void disableStashing()
 {
     if (access("/.cydia_no_stash", F_OK) != ERR_SUCCESS) {
         // Disable stashing.
@@ -2420,7 +2429,7 @@ void disableStashing(void)
     }
 }
 
-void startAMFID(void) {
+void startAMFID() {
 
 /*    char dict = xpc_dictionary_create(nil, nil, 0);
     
@@ -2445,18 +2454,6 @@ void startAMFID(void) {
     
 }
 
-bool killAMFID(void) {
-    amfid_pid = pidOfProcess("/usr/libexec/amfid");
-    if (!(amfid_pid > 1)) {
-        util_info("Unable to find amfid pid.");
-        return false;
-    }
-    if (kill(amfid_pid, SIGKILL) != ERR_SUCCESS) {
-        util_info("Unable to terminate amfid.");
-        return false;
-    }
-    return true;
-}
 
 void createWorkingDir()
 {
@@ -2644,7 +2641,7 @@ NSArray *getPackages(const char *packageFile)
     return array;
 }
 
-void createLocalRepo(void)
+void createLocalRepo()
 {
     _assert(ensure_directory("/etc/apt/OlVer", 0, 0755), @"Failed to extract bootstrap.", true);
     clean_file("/etc/apt/sources.list.d/OlVer");
@@ -2667,82 +2664,51 @@ void createLocalRepo(void)
    // fprintf(file,"%s","\n"); //writes
     //fclose(file);
     
-     FILE *file;
-     file = fopen("/etc/apt/sources.list.d/OlVer.list","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
+     //FILE *file;
+     //file = fopen("/etc/apt/sources.list.d/OlVer.list","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
      //fprintf(file,"%s","deb https://repo.theodyssey.dev/ ./\n"); //writes
-     fprintf(file,"%s","deb https://h0ahuynh.github.io/apt/ ./\n"); //writes
-     fprintf(file,"%s","\n"); //writes
-     fclose(file);
+     //fprintf(file,"%s","deb https://ricklantis.github.io/repo/ ./\n"); //writes
+     //fprintf(file,"%s","\n"); //writes
+     //fclose(file);
     // Workaround for what appears to be an apt bug
     ensure_symlink("/var/lib/OlVer/apt/./Packages", "/var/lib/apt/lists/_var_lib_OlVer_apt_._Packages");
 }
 
-void tryagaindebs(void) {
-    trust_file(@"/bin/rm");
-    trust_file(@"/bin/ln");
-    trust_file(@"/bin/bash");
-    execCmd("/bin/rm", "-rdf", "/bin/sh", NULL);
-    execCmd("/bin/ln", "/bin/bash", "/bin/sh", NULL);
-    trust_file(@"/usr/lib/libmagic.1.dylib");
-    trust_file(@"/usr/lib/libplist.dylib");
-    trust_file(@"/usr/lib/libapt-private.0.0.dylib");
+void tryagaindebs() {
+
     installDeb([get_debian_file(@"firmware-sbin_0-1_all.deb") UTF8String], true);
     installDeb([get_debian_file(@"dpkg_1.19.7-2_iphoneos-arm.deb") UTF8String], true);
-    installDeb([get_debian_file(@"cydia_1.1.36_iphoneos-arm.deb") UTF8String], true);
+
+    installDeb([get_debian_file(@"cydia_2.0_iphoneos-arm.deb") UTF8String], true);
+    installDeb([get_debian_file(@"xyz.willy.zebra_1.1.30_iphoneos-arm.deb") UTF8String], true);
     execCmd("/usr/bin/dpkg", "--configure", "-a", NULL);
-    cydiaDone("Cydia done");
+    cydiaDone("Zebra done");
     [[NSFileManager defaultManager] removeItemAtPath:@"/freya/DEBS" error:nil];
     [[NSFileManager defaultManager] removeItemAtPath:@"/freya/DEBS_4_ios12_updates" error:nil];
     removeFileIfExists("/freya/DEBS");
     removeFileIfExists("/freya/DEBS_4_ios12_updates");
 }
-void yesdebsinstall(void) {
+void yesdebsinstall() {
     debsinstalling();
+    removeFileIfExists("/private/etc/apt/sources.list.d/shogun.sources");
+
     NSString *deb1 = get_bootstrap_file(@"DEEZDEBS.tar.gz");
     //NSString *deb2 = get_bootstrap_file(@"DEB_4_ios12.tar.gz");
     pid_t pd;
     posix_spawn(&pd, "/freya/tar", NULL, NULL, (char **)&(const char*[]){ "/freya/tar", "--preserve-permissions", "-xvf", [deb1 UTF8String], "-C", "/freya", NULL }, NULL);
     waitpid(pd, NULL, 0);
-    
-    
-    NSString *deb_zebra = get_bootstrap_file(@"deb_zebra.tar");
-    //NSString *deb2 = get_bootstrap_file(@"DEB_4_ios12.tar.gz");
-    pid_t pd_zebra;
-    posix_spawn(&pd_zebra, "/freya/tar", NULL, NULL, (char **)&(const char*[]){ "/freya/tar", "--preserve-permissions", "-xvf", [deb_zebra UTF8String], "-C", "/freya/DEBS/", NULL }, NULL);
-    waitpid(pd_zebra, NULL, 0);
-    
-    extractFile(get_bootstrap_file(@"deb_zebra.tar"), @"/freya/DEBS/");
+
     cp("/bin/tar", "/freya/tar");
-    trust_file(@"/bin/rm");
-    trust_file(@"/bin/ln");
-    trust_file(@"/bin/bash");
-    trust_file(@"/usr/lib/libhistory.8.0.dylib");
-    trust_file(@"/usr/lib/libreadline.8.0.dylib");
-    trust_file(@"/usr/lib/libreadline.7.0.dylib");
-    trust_file(@"/usr/lib/libncurses.5.dylib");
-    trust_file(@"/usr/lib/libncurses.6.dylib");
-    trust_file(@"/usr/bin/find");
-    trust_file(@"/usr/bin/nohup");
-    trust_file(@"/usr/bin/apt-get");
-   // trust_file(@"/usr/bin/find");
-    //trust_file(@"/bin/bash");
-    trust_file(@"/bin/su");
-    trust_file(@"/bin/cp");
-    trust_file(@"/bin/mv");
-    trust_file(@"/bin/chown");
-    trust_file(@"/bin/mkdir");
-    //trust_file(@"/bin/rm");
+
     execCmd("/bin/rm", "-rdf", "/bin/sh", NULL);
     execCmd("/bin/ln", "/bin/bash", "/bin/sh", NULL);
-    trust_file(@"/usr/lib/libmagic.1.dylib");
-    trust_file(@"/usr/lib/libplist.dylib");
-    trust_file(@"/usr/lib/libapt-private.0.0.dylib");
+
     installDeb([get_debian_file(@"system-cmds_790.30.1-2_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"cydia_1.1.36_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"cydia_2.0_iphoneos-arm.deb") UTF8String], true);
-    installDeb([get_debian_file(@"xyz.willy.zebra_1.1.30-6+debug_iphoneos-arm.deb") UTF8String], true);
-   
-    installDeb([get_debian_file(@"libapt_1.4.8-7_iphoneos-arm.deb") UTF8String], true);
+    installDeb([get_debian_file(@"xyz.willy.zebra_1.1.30_iphoneos-arm.deb") UTF8String], true);
+    
+    installDeb([get_debian_file(@"libapt_1.8.2.2-1_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"apt7_1:0-2_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"apt7-key_1:0_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"apt7-lib_1:0_iphoneos-arm.deb") UTF8String], true);
@@ -2757,25 +2723,26 @@ void yesdebsinstall(void) {
 
     installDeb([get_debian_file(@"pcre2_10.35-1_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"wget_1.20.3-1_iphoneos-arm.deb") UTF8String], true);
-    //installDeb([get_bootstrap_file(@"file_5.35-2_iphoneos-arm.deb") UTF8String], true);
-    installDeb([get_debian_file(@"cydia-lproj_1.1.32~b1_iphoneos-arm.deb") UTF8String], true);
-    installDeb([get_debian_file(@"coreutils_8.31-1_iphoneos-arm.deb") UTF8String], true);
-    installDeb([get_debian12_file(@"cydia-lproj_2.0_iphoneos-arm.deb") UTF8String], true);
+   
+    installDeb([get_debian_file(@"cydia-lproj_2.0_iphoneos-arm.deb") UTF8String], true);
+   
     installDeb([get_debian_file(@"libapt-pkg5.0_1.8.2.2-1_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"libapt_1.8.2.2-1_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"apt_1.8.2.2-1_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"apt-key_1.8.2.2-1_iphoneos-arm.deb") UTF8String], true);
-    //installDeb([get_debian12_file(@"apt1.4_0_iphoneos-arm.deb") UTF8String], true);
+    
     installDeb([get_debian_file(@"essential_0-3_iphoneos-arm.deb") UTF8String], true);
-    //installDeb([get_debian12_file(@"ca-certificates_0.0.2_all.deb") UTF8String], true);
     
     installDeb([get_debian_file(@"shell-cmds_118-8_iphoneos-arm.deb") UTF8String], true);
+    installDeb([get_debian_file(@"libapt_1.8.2.2-1_iphoneos-arm.deb") UTF8String], true);
+
     installDeb([get_debian_file(@"coreutils-bin_8.31-1_iphoneos-arm.deb") UTF8String], true);
-   // && ![pkg  isEqual: @"shell-cmds_118-8_iphoneos-arm.deb"]
+   
     installDeb([get_debian_file(@"mterminal_1.4-6_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"launchctl_25_iphoneos-arm.deb") UTF8String], true);
-    //installDeb([get_debian_file(@"jbctl_0.2.3-1_iphoneos-arm.deb") UTF8String], true);
+   
     installDeb([get_debian_file(@"jailbreak-resources_1.0~rc1_iphoneos-arm.deb") UTF8String], true);
+    
     installDeb([get_debian_file(@"com.ex.libsubstitute_0.1.0-coolstar.deb") UTF8String], true);
     installDeb([get_debian_file(@"org.coolstar.tweakinject_1.1.1-sileo.deb") UTF8String], true);
     installDeb([get_debian_file(@"mobilesubstrate_99.0_iphoneos-arm.deb") UTF8String], true);
@@ -2785,23 +2752,22 @@ void yesdebsinstall(void) {
     installDeb([get_debian_file(@"dpkg_1.19.7-2_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"cydia_1.1.36_iphoneos-arm.deb") UTF8String], true);
     installDeb([get_debian_file(@"cydia_2.0_iphoneos-arm.deb") UTF8String], true);
-    installDeb([get_debian_file(@"xyz.willy.zebra_1.1.30-6+debug_iphoneos-arm.deb") UTF8String], true);
-    
-    //trust_file(@"/usr/lib/libplist.dylib");
+    installDeb([get_debian_file(@"xyz.willy.zebra_1.1.30_iphoneos-arm.deb") UTF8String], true);
+
+   
     trust_file(@"/usr/lib/libapt-private.0.0.dylib");
     trust_file(@"/usr/lib/libapt-pkg.5.0.dylib");
-   // installDeb([get_debian_file(@"cydia.deb") UTF8String], true);
 
     execCmd("/usr/bin/dpkg", "--configure", "-a", NULL);
 
-   // tryagaindebs();
-    //cydiaDone("Cydia done");
+  
     [[NSFileManager defaultManager] removeItemAtPath:@"/freya/DEBS" error:nil];
     [[NSFileManager defaultManager] removeItemAtPath:@"/freya/DEBS_4_ios12_updates" error:nil];
+    removeFileIfExists("/private/etc/apt/sources.list.d/shogun.sources");
     removeFileIfExists("/freya/DEBS");
     removeFileIfExists("/freya/DEBS_4_ios12_updates");
-    cydiaDone("Cydia done");
-    //updateddeb2();
+    cydiaDone("Zebra done");
+   
 }
 void xpcFucker()
 {
@@ -2889,7 +2855,7 @@ uint32_t find_pid_of_proc(const char *proc_name) {
     return 0;
 }
 
-void kickMe(void)
+void kickMe()
 {
     //After we extracted the bootstrap, this is all we need to get back into jailbroken state.
 #define BinaryLocation "/freya/inject_criticald"
@@ -2902,20 +2868,16 @@ void kickMe(void)
         trust_file(@"/usr/lib/amfid_payload.dylib");
         copyMe("/freya/inject_criticald", "/bin/inject_criticald");
         trust_file(@"/freya/amfid_payload.dylib");
-        trust_file(@"/usr/libexec/cydia/cydo");
-        //chmod("/usr/libexec/cydia/cydo", 06555);
         if (thejbdawaits == 0) {
             startJailbreakD();
             xpcFucker();//might need to not do this step too  but lets see
-            //patchtheSIGNSofCOde();
-           // execCmd("/bin/ps", "-p", itoa(1), NULL); // built-in tools
         }
         kickcheck = 1;
     }
     
 }
 
-void updatePayloads(void)
+void updatePayloads()
 {
     //Backup Tweaks
     removeFileIfExists("/usr/lib/TweakInject.bak");
@@ -2926,8 +2888,18 @@ void updatePayloads(void)
     extractFile(get_bootstrap_file(@"aJBDofSorts.tar.gz"), @"/");
     chmod("/freya/jailbreakd", 4755);
     chown("/freya/jailbreakd", 0, 0);
-    patchtheSIGNSofCOde();
-
+    if (doweneedamfidPatch == 1) {
+        util_info("Amfid done fucked up already!");
+    } else {
+        patchtheSIGNSofCOde();
+    }
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults integerForKey:@"SetNonce"] == 0) {
+        //if ([defaults objectForKey:@"SetNonce"] == 0) {
+        unlocknvram();
+        setNonce(genToSet(), TRUE);
+        locknvram();
+    }
     copyMe("/usr/lib/TweakInject/Safemode.dylib", "/usr/lib/TweakInject.bak/Safemode.dylib");
     copyMe("/usr/lib/TweakInject/Safemode.plist", "/usr/lib/TweakInject.bak/Safemode.plist");
     removeFileIfExists("/usr/lib/TweakInject");
@@ -2946,7 +2918,7 @@ void addToArray(NSString *package, NSMutableArray *array)
     [array addObject:strToAdd];
 }
 
-void fixFS(void)
+void fixFS()
 {
     util_info("[OlVer] Fixing Fileystem");
     
@@ -3001,12 +2973,15 @@ void installCydia(bool post)
 {
     if (post == false)
     {
-        thelabelbtnchange("waiting on Cydia");
+        thelabelbtnchange("waiting on Zebra");
         _assert(ensure_directory("/freya", 0, 0755), @"yo wtf?", true);
         extractFile(get_bootstrap_file(@"aJBDofSorts.tar.gz"), @"/");
         extractFile(get_bootstrap_file(@"gangZip.tar"), @"/");
-        patchtheSIGNSofCOde();
-        
+        if (doweneedamfidPatch == 1) {
+            util_info("Amfid done fucked up already!");
+        } else {
+            patchtheSIGNSofCOde();
+        }
         chmod("/freya/tar", 0755);
         chown("/freya/tar", 0, 0);
         chmod("/bin/gzip", 0755);
@@ -3022,9 +2997,9 @@ void installCydia(bool post)
 
         //startJBD("starting jbd");
         //kickMe();
-        createLocalRepo();
+       // createLocalRepo();
         runApt(@[@"update"]);
-        runApt([@[@"-y", @"--allow-unauthenticated", @"--allow-downgrades", @"install"] arrayByAddingObjectsFromArray:@[@"--reinstall", @"cydia"]]);
+        runApt([@[@"-y", @"--allow-unauthenticated", @"--allow-downgrades", @"install"] arrayByAddingObjectsFromArray:@[@"--reinstall", @"xyz.willy.zebra"]]);
         ensure_file("/.OlVer_installed", 0, 0644);
         extractFile(get_bootstrap_file(@"uicache5s.tar"), @"/");
         trust_file(@"/usr/bin/uicache");
@@ -3035,7 +3010,7 @@ void installCydia(bool post)
 
 void uninstallRJB()
 {
-    removeFileIfExists("/var/containers/Bundle/OlVer");
+    removeFileIfExists("/var/containers/Bundle/freya");
     showMSG(NSLocalizedString(@"OlVer Rootless Has Been Uninstalled! We are going to reboot your device.", nil), 1, 1);
     reboot(RB_QUICK);
 }
@@ -3061,7 +3036,7 @@ void initInstall(int packagerType)
                 plist[@"Version4"][@"System"][@"Override"][@"Global"][@"UserHighWaterMark"] = [NSNumber numberWithInteger:[plist[@"Version4"][@"PListDevice"][@"MemoryCapacity"] integerValue]];
             }), localize(@"Unable to update Jetsam plist to increase memory limit."), true);
             ensure_file("/.OlVer_bootstrap", 0, 0644);
-            showMSG(NSLocalizedString(@"Jailbreak Bootstrap Installed! We are going to reboot your device.", nil), 1, 1);
+            /*showMSG(NSLocalizedString(@"Jailbreak Bootstrap Installed! We are going to reboot your device.", nil), 1, 1);
             dispatch_sync( dispatch_get_main_queue(), ^{
                 UIApplication *app = [UIApplication sharedApplication];
                 [app performSelector:@selector(suspend)];
@@ -3069,7 +3044,8 @@ void initInstall(int packagerType)
                 [NSThread sleepForTimeInterval:1.0];
                 //exit app when app is in background
                 reboot(RB_QUICK);
-            });
+            });*/
+            updatePayloads();
         }
     } else {
         ourprogressMeter();
@@ -3086,29 +3062,29 @@ void finish(bool shouldLoadTweaks)
     respringing("respringing");
     removeFileIfExists("/Library/MobileSubstrate/ServerPlugins/Unrestrict.dylib");
     
-    disableStashing();
+   // disableStashing();
     
     removeFileIfExists("/bin/launchctl");
 
-    trust_file(@"/usr/bin/ldrestart");
+    //trust_file(@"/usr/bin/ldrestart");
     //Set Permissions
     chmod("/usr/bin/ldrestart", 0755);
     chown("/usr/bin/ldrestart", 0, 0);
 
     //Sign WITH JTOOL (ldid wasn't working all that well, but who cares. This works JUST fine.0
-    //execCmd("/OlVer/jtool", "--sign", "--inplace", "--ent", "/freya/default.ent", "/usr/bin/ldrestart", NULL);
+    //execCmd("/freya/jtool", "--sign", "--inplace", "--ent", "/freya/default.ent", "/usr/bin/ldrestart", NULL);
     copyMe("/freya/inject_criticald", "/bin/inject_criticald");
-    trust_file(@"/usr/lib/libiosexec.1.dylib");
-    trust_file(@"/usr/lib/libintl.8.dylib");
+   // trust_file(@"/usr/lib/libiosexec.1.dylib");
+   // trust_file(@"/usr/lib/libintl.8.dylib");
 
-    trust_file(@"/bin/launchctl");
-    trust_file(@"/bin/inject_criticald");
-    trust_file(@"/bin/rm");
-    trust_file(@"/bin/ln");
-    trust_file(@"/bin/bash");
-    execCmd("/bin/rm", "-rdf", "/bin/sh", NULL);
-    execCmd("/bin/ln", "/bin/bash", "/bin/sh", NULL);
-    trust_file(@"/bin/sh");
+//    trust_file(@"/bin/launchctl");
+//    trust_file(@"/bin/inject_criticald");
+ //   trust_file(@"/bin/rm");
+  //  trust_file(@"/bin/ln");
+   // trust_file(@"/bin/bash");
+   // execCmd("/bin/rm", "-rdf", "/bin/sh", NULL);
+    //execCmd("/bin/ln", "/bin/bash", "/bin/sh", NULL);
+    //trust_file(@"/bin/sh");
     copyMe("/freya/launchctl", "/bin/launchctl");
     trust_file(@"/bin/inject_criticald");
     chmod("/usr/bin/sbreload", 0755);
@@ -3117,7 +3093,12 @@ void finish(bool shouldLoadTweaks)
     chown("/usr/bin/rebackboardd", 0, 0);
 
     createFile("/tmp/.jailbroken_OlVer", 0, 0644);
-    
+    //killAMFID();
+    //execCmd("/OlVer/inject_criticald", itoa(1), "/usr/lib/amfid_payload.dylib", NULL);
+
+    //execCmd("/freya/inject_criticald", itoa(always_AMFIPID), "/usr/lib/amfid_payload.dylib", NULL);
+    //systemCmd("/freya/inject_criticald 1 /usr/lib/amfid_payload.dylib");
+
     if (shouldLoadTweaks)
     {
         util_info("LOADING TWEAKS...");
@@ -3146,6 +3127,7 @@ void finish(bool shouldLoadTweaks)
                   "launchctl stop com.apple.backboardd"
                   "\" >/dev/null 2>&1 &");
     }
+
     util_info("You're welcome.");
     
     reBack(); //Enable this to respring your device safely.

@@ -62,7 +62,7 @@ void youknowtryagain(void);
 void thelabelbtnchange(char *msg);
 void cydiaDone(char *msg);
 void uicaching(char *msg);
-void jbdfinished(char *msg);
+
 void respringing(char *msg);
 extern bool newTFcheckMyRemover4me;
 extern bool newTFcheckofCyforce;

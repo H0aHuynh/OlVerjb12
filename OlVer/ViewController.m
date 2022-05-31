@@ -153,8 +153,8 @@ static ViewController *currentViewController;
 
 
 
-NSString *freyaversion = @"Phiên bản: 1.1";
-char *freyaversionnew = "Phiên bản: 1.1";
+NSString *freyaversion = @"Phiên bản: 1.2";
+char *freyaversionnew = "Phiên bản: 1.2";
 
 //char *freyaupdateDate = "9:30PM 04/07/22";
 //char *freyaurlDownload = "github.com/pwned4ever/Th0r_Freya/blob/main/Releases/Freya.ipa";// "mega.nz/file/BhNxBSgJ#gNcngNQBtXS0Ipa5ivX09-jtIr7BckUhrA7YMkSFaNM"//
@@ -223,15 +223,7 @@ char *freyaversionnew = "Phiên bản: 1.1";
     int checkjailbreakdRun = (file_exists("/var/tmp/jailbreakd.pid"));
     int checkjailbreakdrRun = (file_exists("/var/run/jailbreakd.pid"));
     int checkpspawnhook = (file_exists("/var/run/pspawn_hook.ts"));
-    printf("JUSTremovecheck exists?: %d\n",JUSTremovecheck);
-    printf("Uncover marker exists?: %d\n", checkuncovermarker);
-    printf("pspawnhook marker exists?: %d\n", checkpspawnhook);
-    printf("JBRemover marker exists?: %d\n", checkJBRemoverMarker);
-    printf("OlVer marker exists?: %d\n", checkth0rmarker);
-    printf("OlVer Final marker exists?: %d\n", checkth0rmarkerFinal);
-    printf("Chimera marker exists?: %d\n", checkchimeramarker);
-    printf("Jailbreakd Run marker exists?: %d\n", checkjailbreakdRun);
-    printf("Jailbreakd Run marker exists?: %d\n", checkjailbreakdrRun);
+   
     [[NSUserDefaults standardUserDefaults] setValue:@(NO) forKey:@"_UIConstraintBasedLayoutLogUnsatisfiable"];
     currentViewController = self;
     sharedController = self;
@@ -660,18 +652,10 @@ void wannaSliceOfMe() {
         //[*] OFFSETS
         
         
-        //0 = MachSwap
-        //1 = MachSwap2
-        //2 = Voucher_Swap
-        //3 = SockPuppet
-        //4 = timewaste
-        //usleep(30000);
         dothesploit();
-        //usleep(1000);
         runExploit(getExploitType()); //Change this depending on what device you have...
         dothepatch();
         ourprogressMeter();
-        //usleep(1000);
         getOffsets();
         offs_init();
 
@@ -680,42 +664,31 @@ void wannaSliceOfMe() {
         //[*] REMOUNT //
         //[*] REQUIRED FILES TO FINISH ARE EXTRACTED
         //[*] REMAP
-        usleep(1000);
+        
         init_kexecute();
-        //usleep(10000);
-//        usleep(1000);
-
-
         yeasnapshot();
-
         remountFS(restore_fs);
         ourprogressMeter();
-        usleep(1000);
         createWorkingDir();
-        //usleep(1000);
         saveOffs();
         ourprogressMeter();
-        usleep(1000);
         setHSP4();
-        usleep(1000);
-        //usleep(1000);
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        if ([defaults integerForKey:@"SetNonce"] == 0) {
-        //if ([defaults objectForKey:@"SetNonce"] == 0) {
-            //usleep(10000);
-            unlocknvram();
-            //usleep(10000);
-            setNonce(genToSet(), TRUE);
-            locknvram();
-        }
+
         
 
         initInstall(getPackagerType());
+      /*  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        if ([defaults integerForKey:@"SetNonce"] == 0) {
+            //if ([defaults objectForKey:@"SetNonce"] == 0) {
+            unlocknvram();
+            setNonce(genToSet(), TRUE);
+            locknvram();
+        }*/
         
+        //post_exploit();
         ourprogressMeter();
         term_kexecute();
         ourprogressMeter();
-       
         finish(loadTweaks);
         
         
@@ -857,7 +830,7 @@ end:
 
 -(void)ohsnapnofail{
     
-    showMSG(NSLocalizedString(@"Exploit Failed but just open the app when it closes and try again, as long as it didn't already kernel panic you can keep trying.", nil), 1, 1);
+    showMSG(NSLocalizedString(@"Khai thác Không thành công nhưng chỉ mở ứng dụng khi nó đóng và thử lại, miễn là nó chưa làm hạt nhân hoảng sợ, bạn có thể tiếp tục thử.", nil), 1, 1);
     dispatch_sync( dispatch_get_main_queue(), ^{
         UIApplication *app = [UIApplication sharedApplication];
         [app performSelector:@selector(suspend)];

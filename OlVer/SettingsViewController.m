@@ -35,10 +35,7 @@
     int checkth0rmarker = (file_exists("/.OlVer_bootstrap"));
     int checkth0rmarkerFinal = (file_exists("/.OlVer_installed"));
     int checkchimeramarker = (file_exists("/.procursus_strapped"));
-    printf("Uncover marker exists?: %d\n",checkuncovermarker);
-    printf("Th0r marker exists?: %d\n",checkth0rmarker);
-    printf("Th0r final marker exists?: %d\n",checkth0rmarkerFinal);
-    printf("Chimera marker exists?: %d\n",checkchimeramarker);
+   
     
     CAGradientLayer *gradient = [CAGradientLayer layer];
 
@@ -173,7 +170,7 @@
         {
             JUSTremovecheck = true;
             dispatch_async(dispatch_get_main_queue(), ^{
-                [ViewController.sharedController.buttontext setTitle:localize(@"Remove Freya?") forState:UIControlStateNormal];
+                [ViewController.sharedController.buttontext setTitle:localize(@"Remove OlVer?") forState:UIControlStateNormal];
                 [self.restoreFSSwitch setOn:true];
                 [self.setnoncebtn setEnabled:FALSE];
                 [self.setnoncebtn setHidden:TRUE];
@@ -182,7 +179,7 @@
             
             JUSTremovecheck = false;
             dispatch_async(dispatch_get_main_queue(), ^{
-                [ViewController.sharedController.buttontext setTitle:localize(@"Enable Freya?") forState:UIControlStateNormal];
+                [ViewController.sharedController.buttontext setTitle:localize(@"Enable OlVer?") forState:UIControlStateNormal];
                 [self.restoreFSSwitch setOn:false];
                 [self.setnoncebtn setEnabled:TRUE];
                 [self.setnoncebtn setHidden:FALSE];
@@ -193,12 +190,12 @@
     }else {
             if (shouldRestoreFS())
             {
-                //[ViewController.sharedController.buttontext setTitle:localize(@"Remove Freya?") forState:UIControlStateNormal];
+                //[ViewController.sharedController.buttontext setTitle:localize(@"Remove OlVer?") forState:UIControlStateNormal];
                 JUSTremovecheck = true;
                 [_restoreFSSwitch setOn:true];
                 
             } else {
-                //[ViewController.sharedController.buttontext setTitle:localize(@"Enable Freya?") forState:UIControlStateNormal];
+                //[ViewController.sharedController.buttontext setTitle:localize(@"Enable OlVer?") forState:UIControlStateNormal];
                 JUSTremovecheck = false;
                 [_restoreFSSwitch setOn:false];
             }
@@ -450,16 +447,13 @@ static ViewController *currentViewController;
     int checkth0rmarker = (file_exists("/.OlVer_bootstrap"));
     int checkth0rmarkerFinal = (file_exists("/.OlVer_installed"));
     int checkchimeramarker = (file_exists("/.procursus_strapped"));
-    printf("Uncover marker exists?: %d\n",checkuncovermarker);
-    printf("OlVer marker exists?: %d\n",checkth0rmarker);
-    printf("OlVer final marker exists?: %d\n",checkth0rmarkerFinal);
-    printf("Chimera marker exists?: %d\n",checkchimeramarker);
+  
     [ViewController.sharedController.buttontext setEnabled:true];
 
     if ([sender isOn])
     {
         if ((checkth0rmarker == 1) && (checkuncovermarker == 0) && (checkchimeramarker == 0)){
-            [ViewController.sharedController.buttontext setTitle:localize(@"Remove Freya?") forState:UIControlStateNormal];
+            [ViewController.sharedController.buttontext setTitle:localize(@"Remove OlVer?") forState:UIControlStateNormal];
             newTFcheckMyRemover4me = TRUE;
         } else if ((checkuncovermarker == 1) && (checkth0rmarker == 0) && (checkchimeramarker == 0)) {
             [ViewController.sharedController.buttontext setTitle:localize(@"Remove u0?") forState:UIControlStateNormal];
@@ -491,7 +485,7 @@ static ViewController *currentViewController;
         saveCustomSetting(@"RestoreFS", 0);
     } else {
         if ((checkth0rmarker == 1) && (checkuncovermarker == 0) && (checkchimeramarker == 0)){
-            [ViewController.sharedController.buttontext setTitle:localize(@"Enable Freya?") forState:UIControlStateNormal];
+            [ViewController.sharedController.buttontext setTitle:localize(@"Enable OlVer?") forState:UIControlStateNormal];
             [_setnoncebtn setHidden:NO];
             [_setnoncebtn setEnabled:YES];
 
@@ -594,7 +588,7 @@ static ViewController *currentViewController;
 - (IBAction)creditspressed:(id)sender {
     //show confirmation message to user
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Credits To:"
-                                                 message:@"@YcS_dev for helping out with remount & pushing me to make this project.\n@Chr0nicT for teaching me some general basics.\nEveryone whom helped to create ziyou and published it on github.\nThank you! for using Freya to jailbreak your device!"
+                                                 message:@"Cảm ơn @shogunpwnd đã hộ trợ tôi hoàn thiện OlVer jailbreak.\nThank you! for using OlVer to jailbreak your device!"
                                                 delegate:self
                                        cancelButtonTitle: nil
                                        otherButtonTitles:@"OK", nil];

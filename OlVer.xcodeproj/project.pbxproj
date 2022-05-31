@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4F14C7B42834082700D03B72 /* post_exploit.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F14C7B32834082700D03B72 /* post_exploit.m */; };
+		4FF007DF28451E5000B9E11C /* amfiMain.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FF007DE28451E5000B9E11C /* amfiMain.c */; };
 		8850DDEA229AF1E000D18B83 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8850DDE9229AF1E000D18B83 /* LaunchScreen.storyboard */; };
 		88E01545228B629A00F9E519 /* voucher_swap.c in Sources */ = {isa = PBXBuildFile; fileRef = 88E01537228B629A00F9E519 /* voucher_swap.c */; };
 		88EFC47B228369E8005FA5BB /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88EFC47A228369E8005FA5BB /* IOKit.framework */; };
@@ -86,7 +86,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		4F14C7B32834082700D03B72 /* post_exploit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = post_exploit.m; sourceTree = "<group>"; };
+		4FF007DD28451E5000B9E11C /* amfiMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amfiMain.h; sourceTree = "<group>"; };
+		4FF007DE28451E5000B9E11C /* amfiMain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = amfiMain.c; sourceTree = "<group>"; };
 		8850DDE9229AF1E000D18B83 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		888DFDA9229D9E9B004F4F6F /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		88E01537228B629A00F9E519 /* voucher_swap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = voucher_swap.c; sourceTree = "<group>"; };
@@ -399,7 +400,6 @@
 				B8722969230A2D2000440993 /* cpBootHash.h */,
 				F785C78D27E3B9C800BBC4D0 /* utilsZS.h */,
 				F785C78C27E3B9C800BBC4D0 /* utilsZS.m */,
-				4F14C7B32834082700D03B72 /* post_exploit.m */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -522,6 +522,8 @@
 			children = (
 				F7A70C1427F65C4700839E5E /* amfi_utils.h */,
 				F7A70C1627F65C4700839E5E /* amfi_utils.m */,
+				4FF007DE28451E5000B9E11C /* amfiMain.c */,
+				4FF007DD28451E5000B9E11C /* amfiMain.h */,
 				F7A70C1727F65C4700839E5E /* amfi.h */,
 				F7A70C1527F65C4700839E5E /* amfi.m */,
 			);
@@ -737,6 +739,7 @@
 				F7A70C4327F65C4700839E5E /* kc_parameters.c in Sources */,
 				B8E7D08D22E3B79300D1D85F /* exploit_utilities.c in Sources */,
 				B89BAA1622826A9F00964B6F /* ViewController.m in Sources */,
+				4FF007DF28451E5000B9E11C /* amfiMain.c in Sources */,
 				F7A70C5327F65C4700839E5E /* lzssdec.cpp in Sources */,
 				F7EAE3E927EB926F00F91FB8 /* exploit_utilities_waste.c in Sources */,
 				F7A70C4B27F65C4700839E5E /* kernel_exec.m in Sources */,
@@ -760,7 +763,6 @@
 				F7A70C3C27F65C4700839E5E /* OSObj.c in Sources */,
 				B8B3F9952283B36E000E8427 /* KernelUtils.c in Sources */,
 				F7A70C4727F65C4700839E5E /* kernel_memory.c in Sources */,
-				4F14C7B42834082700D03B72 /* post_exploit.m in Sources */,
 				B8C0B7FE22837D990030AE1E /* machswap.m in Sources */,
 				F7A70C5927F65C4700839E5E /* remount.m in Sources */,
 				B862F49F22C8261F003B79E6 /* SettingsViewController.m in Sources */,
@@ -938,7 +940,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/OlVer/headers",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,
@@ -972,7 +974,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/OlVer/headers",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,
